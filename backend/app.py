@@ -3,6 +3,7 @@ import os
 from pydub import AudioSegment
 import speech_recognition as sr
 from moviepy.editor import VideoFileClip
+import shutil
 
 app = Flask(__name__)
 
@@ -43,7 +44,11 @@ def upload_file():
         with sr.AudioFile(cleaned_file_path) as source:
             audio_data = r.record(source)  # Read the audio file
             transcription = r.recognize_google(audio_data)  # Transcribe audio
-            return jsonify({'transcription': transcription})  # Return transcription
+
+        # Remove the cleaned audio file after transcription
+        os.remove(cleaned_file_path)
+
+        return jsonify({'transcription': transcription}), 200
 
     except sr.UnknownValueError:
         return jsonify({'error': 'Speech Recognition could not understand audio.'}), 400
